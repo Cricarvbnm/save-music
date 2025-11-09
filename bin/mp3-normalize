@@ -1,0 +1,5 @@
+#! /usr/bin/env sh
+
+ffmpeg-normalize -t '-18' -tp '-1' -lrt 50 -ar 44100 -c:v copy \
+    -c:a mp3 -e '-aq 0' -ofmt mp3 -ext mp3 \
+    "$@"
