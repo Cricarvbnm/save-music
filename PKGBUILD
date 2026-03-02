@@ -1,8 +1,10 @@
 pkgname=save-music
 pkgver=1.0.1
-pkgrel=1
+pkgrel=2
 
 arch=(any)
+
+depends=(curl ffmpeg)
 
 package() {
   install -d "$pkgdir/usr"
