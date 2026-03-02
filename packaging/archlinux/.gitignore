@@ -1,4 +1,5 @@
 src/
 *.tar.*
+*.zip
 save-music/
 pkg/
