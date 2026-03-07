@@ -1,6 +1,7 @@
 # save-music
 
-A lightweight command-line tool to download music and LRC lyrics from URLs/paths, with optional audio normalization and MP3 ID3 tagging.
+A lightweight command-line tool to download music and LRC lyrics from URLs/paths,
+with optional audio normalization and MP3 ID3 tagging.
 
 ## Features
 
@@ -27,7 +28,12 @@ save-music [OPTIONS] <music-url> [<lrc-url>]
 ## Full Options
 
 ```
-save-music [-t|--title <arg>] [-a|--artist <arg>] [--original-dir-path <arg>] [--normalized-dir-path <arg>] [-i|--input-format <arg>] [-o|--output-format <arg>] [-O|--(no-)original-dir] [-n|--(no-)normalized-dir] [-h|--help] <music-url> [<lrc-url>]
+save-music [-t|--title <arg>] [-a|--artist <arg>] \
+  [--original-dir-path <arg>] [--normalized-dir-path <arg>] \
+  [-O|--(no-)original-dir] [-n|--(no-)normalized-dir] \
+  [-i|--input-format <arg>] [-o|--output-format <arg>] \
+  [-h|--help] \
+  <music-url> [<lrc-url>]
 ```
 
 | Option                         | Description                                                   |
@@ -60,7 +66,7 @@ save-music [-t|--title <arg>] [-a|--artist <arg>] [--original-dir-path <arg>] [-
 sudo make install
 ```
 
-**Make Parameters**
+### Make Parameters
 
 - `PREFIX`: Installation prefix (default: `/usr/local`)
 - `DESTDIR`: Destination directory for installation (default: `""`)
@@ -74,7 +80,7 @@ save-music https://example.com/track.mp3 https://example.com/lyrics.lrc \
   -t "My Track" -a "Artist Name"
 ```
 
-**Output Files**
+#### Basic Download Output Files
 
 - `original/My Track - Artist Name.{mp3,lrc}` (unmodified files)
 - `normalized/My Track - Artist Name.{mp3,lrc}` (normalized audio with ID3 tags)
@@ -82,10 +88,11 @@ save-music https://example.com/track.mp3 https://example.com/lyrics.lrc \
 ### FLAC Input → MP3 Output (with Tagging)
 
 ```bash
-save-music https://example.com/audio%20with%20space.flac -i flac -t "Sample" -a "Performer"
+save-music https://example.com/audio%20with%20space.flac \
+  -i flac -t "Sample" -a "Performer"
 ```
 
-**Output Files**
+#### Conversion Output Files
 
 - `original/Sample - Performer.flac` (unmodified FLAC file)
 - `normalized/Sample - Performer.mp3` (normalized MP3 with ID3 tags)
