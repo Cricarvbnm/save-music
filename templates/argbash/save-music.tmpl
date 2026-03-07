@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+
+# m4_ignore(
+echo "This is just a script template, not the script (yet) - pass it to 'argbash' to fix this." >&2
+exit 11 #)Created by argbash-init v2.11.0
+# Rearrange the order of options below according to what you would like to see in the help message.
+# ARG_OPTIONAL_SINGLE([title], [t], [Title], )
+# ARG_OPTIONAL_SINGLE([artist], [a], [Artist], )
+# ARG_OPTIONAL_SINGLE([original-dir-path], , [Directory storing original files], [original])
+# ARG_OPTIONAL_SINGLE([normalized-dir-path], , [Direcotry storing normalized files], [normalized])
+# ARG_OPTIONAL_SINGLE([input-format], [i], [Input Format: mp3 | flac], [mp3])
+# ARG_OPTIONAL_SINGLE([output-format], [o], [Output Format: mp3 | flac], [flac])
+# ARG_OPTIONAL_BOOLEAN([original-dir], [O], [Whether to make original-dir-path], [on])
+# ARG_OPTIONAL_BOOLEAN([normalized-dir], [n], [Whether to make normalized-dir-path], [on])
+# ARG_POSITIONAL_SINGLE([music-url], [Music URL without spaces], )
+# ARG_POSITIONAL_SINGLE([lrc-url], [LRC URL without spaces], [""])
+# ARG_DEFAULTS_POS
+# ARG_HELP([<The general help message of my script>])
+# ARGBASH_GO
+
+# [ <-- needed because of Argbash
+
+# vvv  PLACE YOUR CODE HERE  vvv
+# Cache
+cache_dir="$HOME/.cache/save-music"
+mkdir -p "$cache_dir"
+
+# Filenames
+name="$_arg_title - $_arg_artist"
+original_cache_path="$cache_dir/$name.$_arg_input_format"
+converted_cache_path="$cache_dir/$name.$_arg_output_format"
+
+if [ -n "$lrc_url" ]; then
+  lrc_cache_path="$cache_dir/$name.lrc"
+fi
+
+# Download
+if ! curl -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:141.0) Gecko/20100101 Firefox/141.0' \
+  --create-dirs --fail --progress-bar "$_arg_music_url" --output "$original_cache_path"; then
+  echo "error: music downloading" >&2
+  exit 1
+fi
+
+if [ -n "$lrc_url" ]; then
+  if ! curl -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:141.0) Gecko/20100101 Firefox/141.0' \
+    --create-dirs --fail --progress-bar "$_arg_lrc_url" --output "$lrc_cache_path"; then
+    echo "error: lrc downloading" >&2
+    exit 1
+  fi
+fi
+
+# Convertion (flac -> mp3)
+if [[ "$_arg_input_format" != "$_arg_output_format" ]]; then
+  if ! ffmpeg -hide_banner -i "$original_cache_path" -q 0 -c:v copy "$converted_cache_path"; then
+    echo "error: convertion (flac -> mp3)" >&2
+    exit 1
+  fi
+fi
+
+# Normalization
+normalized_path=
+if [ "$_arg_normalized_dir" == on ]; then
+  mkdir -p "$_arg_normalized_dir_path"
+  normalized_path="$_arg_normalized_dir_path/$name.$_arg_output_format"
+
+  case "$_arg_output_format" in
+  mp3)
+    echo "mp3 normalizing..." >&2
+    if ! mp3-normalize "$converted_cache_path" --output-folder "$_arg_normalized_dir_path"; then
+      echo "error: mp3 normalize" >&2
+      exit 1
+    fi
+    ;;
+  flac)
+    echo "flac normalizing..." >&2
+    if ! flac-normalize "$converted_cache_path" --output-folder "$_arg_normalized_dir_path"; then
+      echo "error: flac normalize" >&2
+      exit 1
+    fi
+    ;;
+  esac
+fi
+
+# Tag
+if [ -n "$normalized_path" ] && [ -f "$normalized_path" ]; then
+  kid3-cli -c "set title '$_arg_title'" \
+    -c "set artist '$_arg_artist'" \
+    "$normalized_path"
+fi
+
+set -x
+
+# Settlement
+if [ "$_arg_original_dir" == on ]; then
+  mkdir -p "$_arg_original_dir_path"
+
+  if [ -f "$original_cache_path" ]; then
+    cp "$original_cache_path" "$_arg_original_dir_path"
+  fi
+
+  if [ -n "$lrc_cache_path" ] && [ -f "$lrc_cache_path" ]; then
+    cp "$lrc_cache_path" "$_arg_original_dir_path"
+  fi
+fi
+
+if [ "$_arg_normalized_dir" == on ] && [ -n "$lrc_cache_path" ] && [ -f "$lrc_cache_path" ]; then
+  cp "$lrc_cache_path" "$_arg_normalized_dir_path"
+fi
+
+# ^^^  TERMINATE YOUR CODE BEFORE THE BOTTOM ARGBASH MARKER  ^^^
+
+# ] <-- needed because of Argbash
