@@ -5,7 +5,7 @@ pkgrel=1
 arch=(any)
 
 depends=(curl ffmpeg kid3-common bash)
-makedepends=(argbash)
+makedepends=(argbash make)
 
 package() {
   install -d "$pkgdir/usr"
