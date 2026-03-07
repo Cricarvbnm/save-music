@@ -1,15 +1,17 @@
 pkgname=save-music
-pkgver=1.0.2
+pkgver=2.0.0
 pkgrel=1
 
 arch=(any)
 
-depends=(curl ffmpeg)
+depends=(curl ffmpeg kid3-common bash)
+makedepends=(argbash)
 
 package() {
   install -d "$pkgdir/usr"
   cp -r "$srcdir"/$pkgname-$pkgver/src/{bin,share} "$pkgdir/usr"
+  argbash "$srcdir/$pkgname-$pkgver/templates/argbash/save-music.tmpl" -o "$pkgdir/usr/bin/save-music"
 }
 
-source=(https://github.com/Cricarvbnm/save-music/archive/refs/tags/v1.0.2.zip)
-sha256sums=('de3b330428acc9462ac0578eb996dc1152095a82afe40a8eb3f3b096fa599002')
+source=(https://github.com/Cricarvbnm/save-music/archive/refs/tags/v2.0.0.zip)
+sha256sums=('0f64ad3b8362ec33a800311428f1a8e945a58f15ccc07f1efd071e02e983d8bf')
