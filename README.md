@@ -1,10 +1,10 @@
 # save-music
 
-A lightweight command-line tool to download music and LRC lyrics from URLs, with optional audio normalization and MP3 ID3 tagging.
+A lightweight command-line tool to download music and LRC lyrics from URLs/paths, with optional audio normalization and MP3 ID3 tagging.
 
 ## Features
 
-- Download music tracks and lyrics from URLs
+- Download/Copy music tracks and lyrics from URLs/paths
 - Support for MP3/FLAC input audio formats
 - Optional audio normalization processing
 - Automatic MP3 ID3 tagging (title/artist metadata)
@@ -32,8 +32,8 @@ save-music [-t|--title <arg>] [-a|--artist <arg>] [--original-dir-path <arg>] [-
 
 | Option                         | Description                                                   |
 | ------------------------------ | ------------------------------------------------------------- |
-| `<music-url>`                  | **Required** Music URL (no spaces, curl-compatible)           |
-| `<lrc-url>`                    | Optional LRC lyrics URL (no spaces, curl-compatible)          |
+| `<music-url>`                  | Required Music URL/path                                       |
+| `<lrc-url>`                    | Optional LRC lyrics URL/path                                  |
 | `-t, --title <value>`          | Set track title (required for tagging)                        |
 | `-a, --artist <value>`         | Set track artist (required for tagging)                       |
 | `--original-dir-path <path>`   | Directory for original downloaded files (default: `original`) |
@@ -52,7 +52,7 @@ save-music [-t|--title <arg>] [-a|--artist <arg>] [--original-dir-path <arg>] [-
 2. **URL Requirements**
    - All URLs must follow `curl` syntax, e.g. spaces should be encoded as `%20`
 3. **Local File Input**
-   - Use the `file://` protocol prefix for local file paths
+   - If input files not exists, the script treats them as URLs
 
 ## Installation
 
@@ -87,7 +87,7 @@ save-music https://example.com/track.mp3 https://example.com/lyrics.lrc \
 ### FLAC Input → MP3 Output (with Tagging)
 
 ```bash
-save-music https://example.com/audio.flac -i flac -t "Sample" -a "Performer"
+save-music https://example.com/audio%20with%20space.flac -i flac -t "Sample" -a "Performer"
 ```
 
 **Output Files**
@@ -98,7 +98,7 @@ save-music https://example.com/audio.flac -i flac -t "Sample" -a "Performer"
 ### Local File Input
 
 ```bash
-save-music file:///home/user/music/song%20-%20artist.flac -i flac -t "Title" -a "Artist"
+save-music ~/music/song.flac -i flac -t "Title" -a "Artist"
 ```
 
 ### Disable Original Directory

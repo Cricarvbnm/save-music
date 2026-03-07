@@ -12,15 +12,29 @@ exit 11 #)Created by argbash-init v2.11.0
 # ARG_OPTIONAL_SINGLE([output-format], [o], [Output Format: mp3 | flac], [mp3])
 # ARG_OPTIONAL_BOOLEAN([original-dir], [O], [Whether to make original-dir-path], [on])
 # ARG_OPTIONAL_BOOLEAN([normalized-dir], [n], [Whether to make normalized-dir-path], [on])
-# ARG_POSITIONAL_SINGLE([music-url], [Music URL without spaces], )
-# ARG_POSITIONAL_SINGLE([lrc-url], [LRC URL without spaces], [""])
+# ARG_POSITIONAL_SINGLE([music-url], [Music URL / Local Path], )
+# ARG_POSITIONAL_SINGLE([lrc-url], [LRC URL / Local Path], [""])
 # ARG_DEFAULTS_POS
-# ARG_HELP([Save music and lycris from URLs with optional normalization and tagging.])
+# ARG_HELP([Save music and lycris from URLs/paths with optional normalization and tagging.])
 # ARGBASH_GO
 
 # [ <-- needed because of Argbash
 
 # vvv  PLACE YOUR CODE HERE  vvv
+# ===================== 新增：极简文件获取函数（支持本地路径+URL）=====================
+fetch_resource() {
+  local source_path="$1"
+  local dest_path="$2"
+  # Local
+  if [[ -f "$source_path" ]]; then
+    cp -- "$source_path" "$dest_path"
+    return $?
+  fi
+  # Remote
+  curl -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:141.0) Gecko/20100101 Firefox/141.0' \
+    --create-dirs --fail --progress-bar "$source_path" --output "$dest_path"
+}
+
 # Cache
 cache_dir="$HOME/.cache/save-music"
 mkdir -p "$cache_dir"
@@ -30,21 +44,19 @@ name="$_arg_title - $_arg_artist"
 original_cache_path="$cache_dir/$name.$_arg_input_format"
 converted_cache_path="$cache_dir/$name.$_arg_output_format"
 
-if [ -n "$lrc_url" ]; then
+lrc_cache_path=""
+if [ -n "$_arg_lrc_url" ]; then
   lrc_cache_path="$cache_dir/$name.lrc"
 fi
 
-# Download
-if ! curl -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:141.0) Gecko/20100101 Firefox/141.0' \
-  --create-dirs --fail --progress-bar "$_arg_music_url" --output "$original_cache_path"; then
-  echo "error: music downloading" >&2
+if ! fetch_resource "$_arg_music_url" "$original_cache_path"; then
+  echo "error: music downloading/copying" >&2
   exit 1
 fi
 
-if [ -n "$lrc_url" ]; then
-  if ! curl -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:141.0) Gecko/20100101 Firefox/141.0' \
-    --create-dirs --fail --progress-bar "$_arg_lrc_url" --output "$lrc_cache_path"; then
-    echo "error: lrc downloading" >&2
+if [ -n "$_arg_lrc_url" ]; then
+  if ! fetch_resource "$_arg_lrc_url" "$lrc_cache_path"; then
+    echo "error: lrc downloading/copying" >&2
     exit 1
   fi
 fi
