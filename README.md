@@ -56,19 +56,14 @@ save-music [-t|--title <arg>] [-a|--artist <arg>] [--original-dir-path <arg>] [-
 
 ## Installation
 
-1. Install the main script to your system `PATH`:
+```bash
+sudo make install
+```
 
-   ```bash
-   sudo cp save-music /usr/bin/
-   sudo chmod +x /usr/bin/save-music
-   ```
+**Make Parameters**
 
-2. Install fish shell completion:
-
-   ```bash
-   mkdir -p ~/.config/fish/completions/
-   cp save-music.fish ~/.config/fish/completions/
-   ```
+- `PREFIX`: Installation prefix (default: `/usr/local`)
+- `DESTDIR`: Destination directory for installation (default: `""`)
 
 ## Examples
 
