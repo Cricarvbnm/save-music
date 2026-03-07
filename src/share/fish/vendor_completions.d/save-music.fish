@@ -16,7 +16,7 @@ complete -c save-music -l input-format -s i \
     -d "Input format (default: mp3)" \
     -ra "mp3 flac"
 complete -c save-music -l output-format -s o \
-    -d "Output format (default: flac)" \
+    -d "Output format (default: mp3)" \
     -ra "mp3 flac"
 
 complete -c save-music -l help -s h -d "Prints help"
