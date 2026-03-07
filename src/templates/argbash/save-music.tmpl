@@ -21,55 +21,69 @@ exit 11 #)Created by argbash-init v2.11.0
 # [ <-- needed because of Argbash
 
 # vvv  PLACE YOUR CODE HERE  vvv
-# ===================== 新增：极简文件获取函数（支持本地路径+URL）=====================
+# ===================== Restriction =====================
+set -euo pipefail
+IFS=$'\n\t'
+
+# ===================== Dependency Check =====================
+check_dependency() {
+  if ! command -v "$1" &>/dev/null; then
+    echo "error: required command not found: $1" >&2
+    exit 1
+  fi
+}
+check_dependency curl
+check_dependency ffmpeg
+check_dependency kid3-cli
+check_dependency mp3-normalize
+check_dependency flac-normalize
+
+# ===================== Tools =====================
 fetch_resource() {
   local source_path="$1"
   local dest_path="$2"
-  # Local
   if [[ -f "$source_path" ]]; then
     cp -- "$source_path" "$dest_path"
     return $?
   fi
-  # Remote
   curl -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:141.0) Gecko/20100101 Firefox/141.0' \
     --create-dirs --fail --progress-bar "$source_path" --output "$dest_path"
 }
 
-# Cache
+name="$_arg_title - $_arg_artist"
+
+# ===================== Cache =====================
 cache_dir="$HOME/.cache/save-music"
 mkdir -p "$cache_dir"
 
-# Filenames
-name="$_arg_title - $_arg_artist"
-original_cache_path="$cache_dir/$name.$_arg_input_format"
-converted_cache_path="$cache_dir/$name.$_arg_output_format"
+music_cache_path="$cache_dir/$name.$_arg_input_format"
 
-lrc_cache_path=""
+lrc_cache_path=
 if [ -n "$_arg_lrc_url" ]; then
   lrc_cache_path="$cache_dir/$name.lrc"
 fi
 
-if ! fetch_resource "$_arg_music_url" "$original_cache_path"; then
-  echo "error: music downloading/copying" >&2
+# ===================== Download/Copy =====================
+if ! fetch_resource "$_arg_music_url" "$music_cache_path"; then
+  echo "error: music download/copy failed" >&2
   exit 1
 fi
 
 if [ -n "$_arg_lrc_url" ]; then
   if ! fetch_resource "$_arg_lrc_url" "$lrc_cache_path"; then
-    echo "error: lrc downloading/copying" >&2
+    echo "error: lrc download/copy failed" >&2
     exit 1
   fi
 fi
 
-# Convertion (flac -> mp3)
+# ===================== Conversion =====================
+converted_music_path="$music_cache_path"
 if [[ "$_arg_input_format" != "$_arg_output_format" ]]; then
-  if ! ffmpeg -hide_banner -i "$original_cache_path" -q 0 -c:v copy "$converted_cache_path"; then
-    echo "error: convertion (flac -> mp3)" >&2
-    exit 1
-  fi
+  converted_music_path="$cache_dir/$name.$_arg_output_format"
+  ffmpeg -hide_banner -i "$music_cache_path" -q 0 -c:v copy "$converted_music_path"
 fi
 
-# Normalization
+# ===================== Normalization =====================
 normalized_path=
 if [ "$_arg_normalized_dir" == on ]; then
   mkdir -p "$_arg_normalized_dir_path"
@@ -78,45 +92,31 @@ if [ "$_arg_normalized_dir" == on ]; then
   case "$_arg_output_format" in
   mp3)
     echo "mp3 normalizing..." >&2
-    if ! mp3-normalize "$converted_cache_path" --output-folder "$_arg_normalized_dir_path"; then
-      echo "error: mp3 normalize" >&2
-      exit 1
-    fi
+    mp3-normalize "$converted_music_path" --output-folder "$_arg_normalized_dir_path"
     ;;
   flac)
     echo "flac normalizing..." >&2
-    if ! flac-normalize "$converted_cache_path" --output-folder "$_arg_normalized_dir_path"; then
-      echo "error: flac normalize" >&2
-      exit 1
-    fi
+    flac-normalize "$converted_music_path" --output-folder "$_arg_normalized_dir_path"
     ;;
   esac
 fi
 
-# Tag
+# ===================== Tagging =====================
 if [ -n "$normalized_path" ] && [ -f "$normalized_path" ]; then
   kid3-cli -c "set title '$_arg_title'" \
     -c "set artist '$_arg_artist'" \
     "$normalized_path"
 fi
 
-set -x
-
-# Settlement
+# ===================== Archive =====================
 if [ "$_arg_original_dir" == on ]; then
   mkdir -p "$_arg_original_dir_path"
-
-  if [ -f "$original_cache_path" ]; then
-    cp "$original_cache_path" "$_arg_original_dir_path"
-  fi
-
-  if [ -n "$lrc_cache_path" ] && [ -f "$lrc_cache_path" ]; then
-    cp "$lrc_cache_path" "$_arg_original_dir_path"
-  fi
+  cp -n "$music_cache_path" "$_arg_original_dir_path/"
+  [ -n "$lrc_cache_path" ] && cp -n "$lrc_cache_path" "$_arg_original_dir_path/"
 fi
 
-if [ "$_arg_normalized_dir" == on ] && [ -n "$lrc_cache_path" ] && [ -f "$lrc_cache_path" ]; then
-  cp "$lrc_cache_path" "$_arg_normalized_dir_path"
+if [ "$_arg_normalized_dir" == on ] && [ -n "$lrc_cache_path" ]; then
+  cp -n "$lrc_cache_path" "$_arg_normalized_dir_path/"
 fi
 
 # ^^^  TERMINATE YOUR CODE BEFORE THE BOTTOM ARGBASH MARKER  ^^^
