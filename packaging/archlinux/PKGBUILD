@@ -4,7 +4,7 @@ pkgrel=1
 
 arch=(any)
 
-depends=(curl ffmpeg-normalize kid3-common bash)
+depends=(curl ffmpeg ffmpeg-normalize kid3-common bash)
 makedepends=(argbash make)
 
 build() {
