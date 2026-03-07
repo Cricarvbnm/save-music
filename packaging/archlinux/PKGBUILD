@@ -1,5 +1,5 @@
 pkgname=save-music
-pkgver=3.1.0
+pkgver=3.1.1
 pkgrel=1
 
 arch=(any)
@@ -18,4 +18,4 @@ package() {
 }
 
 source=(https://github.com/Cricarvbnm/save-music/archive/refs/tags/v"$pkgver".zip)
-sha256sums=('691279fa8e5ceb348c746d720f8e958b00dc3010da1b77ccba33d20cca6fe16c')
+sha256sums=('be2a8192c4a862ea9fc68764909cf5baebd19de659b311a90e3ed510dfdea44e')
