@@ -62,11 +62,29 @@ save-music [-t|--title <arg>] [-a|--artist <arg>] \
 
 ## Installation
 
+### Arch Linux
+
+```bash
+cd packaging/archlinux
+makepkg -scif
+```
+
+#### Dependencies Not in Arch Repositories
+
+The following dependencies are required but may not available in Arch repositories,
+so they should be built and installed:
+
+- `ffmpeg-normalize`
+  - [AUR](https://aur.archlinux.org/packages/ffmpeg-normalize)
+  - [GitHub](https://github.com/slhck/ffmpeg-normalize)
+
+### Linux
+
 ```bash
 sudo make install
 ```
 
-### Make Parameters
+#### Make Parameters
 
 - `PREFIX`: Installation prefix (default: `/usr/local`)
 - `DESTDIR`: Destination directory for installation (default: `""`)
