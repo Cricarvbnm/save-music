@@ -8,7 +8,7 @@ FISH_COMP_DIR := $(shell pkg-config --variable=completionsdir fish 2>/dev/null |
 # ===================== Source =====================
 BUILD_DIR := build
 # Argbash Template For Main Script
-TEMPLATE_SRC := src/templates/argbash/save-music.tmpl
+TEMPLATE_SRC := src/templates/argbash/save-music.tmpl.bash
 BIN_SCRIPTS := src/bin/flac-normalize src/bin/mp3-normalize
 FISH_COMP_SRC := src/share/fish/vendor_completions.d/save-music.fish
 MAIN_SCRIPT := $(BUILD_DIR)/save-music
