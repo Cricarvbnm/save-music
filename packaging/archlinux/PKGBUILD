@@ -1,5 +1,5 @@
 pkgname=save-music
-pkgver=3.0.0
+pkgver=3.1.0
 pkgrel=1
 
 arch=(any)
@@ -17,5 +17,5 @@ package() {
   make install DESTDIR="$pkgdir" PREFIX=/usr
 }
 
-source=(https://github.com/Cricarvbnm/save-music/archive/refs/tags/v3.0.0.zip)
-sha256sums=('794b7b2c0ff09fbd6ea8cc792fd3bf26afca0293c4e923a4f2e308b5b5df765b')
+source=(https://github.com/Cricarvbnm/save-music/archive/refs/tags/v"$pkgver".zip)
+sha256sums=('691279fa8e5ceb348c746d720f8e958b00dc3010da1b77ccba33d20cca6fe16c')
