@@ -64,19 +64,19 @@ save-music [-t|--title <arg>] [-a|--artist <arg>] \
 
 ### Arch Linux
 
-```bash
-cd packaging/archlinux
-makepkg -scif
-```
-
-#### Dependencies Not in Arch Repositories
-
 The following dependencies are required but may not available in Arch repositories,
 so they should be built and installed:
 
 - `ffmpeg-normalize`
   - [AUR](https://aur.archlinux.org/packages/ffmpeg-normalize)
   - [GitHub](https://github.com/slhck/ffmpeg-normalize)
+
+Begin installation after dependencies above installed:
+
+```bash
+cd packaging/archlinux
+makepkg -scif
+```
 
 ### Linux
 
