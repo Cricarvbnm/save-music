@@ -10,7 +10,7 @@ makedepends=(argbash)
 package() {
   install -d "$pkgdir/usr"
   cp -r "$srcdir"/$pkgname-$pkgver/src/{bin,share} "$pkgdir/usr"
-  argbash "$srcdir/$pkgname-$pkgver/templates/argbash/save-music.tmpl" -o "$pkgdir/usr/bin/save-music"
+  argbash "$srcdir/$pkgname-$pkgver/src/templates/argbash/save-music.tmpl" -o "$pkgdir/usr/bin/save-music"
 }
 
 source=(https://github.com/Cricarvbnm/save-music/archive/refs/tags/v2.0.0.zip)
