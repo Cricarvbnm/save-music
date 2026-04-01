@@ -5,17 +5,18 @@ pkgrel=1
 arch=(any)
 
 depends=(curl ffmpeg ffmpeg-normalize kid3-common bash)
-makedepends=(argbash make)
+makedepends=(argbash make git)
+
+prepare() {
+    cd "$startdir"/../.. || exit 1
+    make -p "$srcdir"
+    git archive HEAD | tar xC "$srcdir"
+}
 
 build() {
-  cd "$srcdir/save-music-$pkgver" || exit 1
-  make
+    make
 }
 
 package() {
-  cd "$srcdir/save-music-$pkgver" || exit 1
-  make install DESTDIR="$pkgdir" PREFIX=/usr
+    make install DESTDIR="$pkgdir" PREFIX=/usr
 }
-
-source=(https://github.com/Cricarvbnm/save-music/archive/refs/tags/v"$pkgver".zip)
-sha256sums=('be2a8192c4a862ea9fc68764909cf5baebd19de659b311a90e3ed510dfdea44e')
