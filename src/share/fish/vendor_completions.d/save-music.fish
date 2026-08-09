@@ -12,11 +12,8 @@ complete -c save-music -l no-original-dir -d "Do not create original-dir-path"
 complete -c save-music -l normalized-dir -s n -d "Create normalized-dir-path (on by default)"
 complete -c save-music -l no-normalized-dir -d "Do not create normalized-dir-path"
 
-complete -c save-music -l input-format -s i \
-    -d "Input format (default: mp3)" \
-    -ra "mp3 flac"
 complete -c save-music -l output-format -s o \
-    -d "Output format (default: mp3)" \
-    -ra mp3
+    -d "Output format (default: mp3, 'same' keeps input format)" \
+    -ra "mp3 flac same"
 
 complete -c save-music -l help -s h -d "Prints help"

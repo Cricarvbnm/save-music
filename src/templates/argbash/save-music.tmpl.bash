@@ -8,8 +8,7 @@ exit 11 #)Created by argbash-init v2.11.0
 # ARG_OPTIONAL_SINGLE([artist], [a], [Artist], )
 # ARG_OPTIONAL_SINGLE([original-dir-path], , [Directory storing original files], [original])
 # ARG_OPTIONAL_SINGLE([normalized-dir-path], , [Direcotry storing normalized files], [normalized])
-# ARG_OPTIONAL_SINGLE([input-format], [i], [Input Format: mp3 | flac], [mp3])
-# ARG_OPTIONAL_SINGLE([output-format], [o], [Output Format: mp3], [mp3])
+# ARG_OPTIONAL_SINGLE([output-format], [o], [Output format: mp3 | flac | same (keep original)], [mp3])
 # ARG_OPTIONAL_BOOLEAN([original-dir], [O], [Whether to make original-dir-path], [on])
 # ARG_OPTIONAL_BOOLEAN([normalized-dir], [n], [Whether to make normalized-dir-path], [on])
 # ARG_POSITIONAL_SINGLE([music-url], [Music URL / Local Path], )
@@ -52,51 +51,69 @@ fetch_resource() {
 
 name="$_arg_title - $_arg_artist"
 
-# ===================== Cache =====================
-cache_dir="$HOME/.cache/save-music"
-mkdir -p "$cache_dir"
+# ===================== Temp Work Directory =====================
+work_dir=$(mktemp -d)
+trap 'rm -rf "$work_dir"' EXIT
 
-music_cache_path="$cache_dir/$name.$_arg_input_format"
-
-lrc_cache_path=
-if [ -n "$_arg_lrc_url" ]; then
-  lrc_cache_path="$cache_dir/$name.lrc"
-fi
-
-# ===================== Download/Copy =====================
-if ! fetch_resource "$_arg_music_url" "$music_cache_path"; then
+# ===================== Download =====================
+music_path="$work_dir/$name"
+if ! fetch_resource "$_arg_music_url" "$music_path"; then
   echo "error: music download/copy failed" >&2
   exit 1
 fi
 
+lrc_path=
 if [ -n "$_arg_lrc_url" ]; then
-  if ! fetch_resource "$_arg_lrc_url" "$lrc_cache_path"; then
+  lrc_path="$work_dir/$name.lrc"
+  if ! fetch_resource "$_arg_lrc_url" "$lrc_path"; then
     echo "error: lrc download/copy failed" >&2
     exit 1
   fi
 fi
 
+# ===================== Auto-Detect Input Format =====================
+detected_codec=$(ffprobe -v error -select_streams a:0 \
+  -show_entries stream=codec_name \
+  -of default=noprint_wrappers=1:nokey=1 "$music_path")
+
+case "$detected_codec" in
+  mp3)     input_fmt=mp3 ;;
+  flac)    input_fmt=flac ;;
+  *)       echo "error: unsupported audio format: $detected_codec" >&2; exit 1 ;;
+esac
+
+# Rename with correct extension
+music_ext="$work_dir/$name.$input_fmt"
+mv "$music_path" "$music_ext"
+
+# ===================== Resolve Output Format =====================
+if [ "$_arg_output_format" = "same" ]; then
+  output_fmt="$input_fmt"
+else
+  output_fmt="$_arg_output_format"
+fi
+
 # ===================== Conversion =====================
-converted_music_path="$music_cache_path"
-if [[ "$_arg_input_format" != "$_arg_output_format" ]]; then
-  converted_music_path="$cache_dir/$name.$_arg_output_format"
-  ffmpeg -hide_banner -i "$music_cache_path" -q 0 -c:v copy "$converted_music_path"
+converted_path="$music_ext"
+if [ "$input_fmt" != "$output_fmt" ]; then
+  converted_path="$work_dir/$name.$output_fmt"
+  ffmpeg -hide_banner -i "$music_ext" -q 0 -c:v copy "$converted_path"
 fi
 
 # ===================== Normalization =====================
 normalized_path=
 if [ "$_arg_normalized_dir" == on ]; then
   mkdir -p "$_arg_normalized_dir_path"
-  normalized_path="$_arg_normalized_dir_path/$name.$_arg_output_format"
+  normalized_path="$_arg_normalized_dir_path/$name.$output_fmt"
 
-  case "$_arg_output_format" in
+  case "$output_fmt" in
   mp3)
     echo "mp3 normalizing..." >&2
-    mp3-normalize "$converted_music_path" --output-folder "$_arg_normalized_dir_path"
+    mp3-normalize "$converted_path" --output-folder "$_arg_normalized_dir_path"
     ;;
   flac)
     echo "flac normalizing..." >&2
-    flac-normalize "$converted_music_path" --output-folder "$_arg_normalized_dir_path"
+    flac-normalize "$converted_path" --output-folder "$_arg_normalized_dir_path"
     ;;
   esac
 fi
@@ -111,12 +128,12 @@ fi
 # ===================== Archive =====================
 if [ "$_arg_original_dir" == on ]; then
   mkdir -p "$_arg_original_dir_path"
-  cp -n "$music_cache_path" "$_arg_original_dir_path/"
-  [ -n "$lrc_cache_path" ] && cp -n "$lrc_cache_path" "$_arg_original_dir_path/"
+  cp -n "$music_ext" "$_arg_original_dir_path/"
 fi
 
-if [ "$_arg_normalized_dir" == on ] && [ -n "$lrc_cache_path" ]; then
-  cp -n "$lrc_cache_path" "$_arg_normalized_dir_path/"
+if [ -n "$lrc_path" ]; then
+  [ "$_arg_original_dir" == on ] && cp -n "$lrc_path" "$_arg_original_dir_path/"
+  [ "$_arg_normalized_dir" == on ] && cp -n "$lrc_path" "$_arg_normalized_dir_path/"
 fi
 
 # ^^^  TERMINATE YOUR CODE BEFORE THE BOTTOM ARGBASH MARKER  ^^^

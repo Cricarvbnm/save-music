@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
 
-flac-normalize ffmpeg-normalize -t '-18' -tp '-1' -lrt 50 -ar 44100 -c:v copy \
-  -c:a flac -ofmt flac \
+ffmpeg-normalize -t '-18' -tp '-1' -lrt 50 -ar 44100 -c:v copy \
+  -c:a flac -ofmt flac -ext flac \
   "$@"
