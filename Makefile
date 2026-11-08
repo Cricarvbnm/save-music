@@ -45,10 +45,16 @@ install: all
 	# 3. Install Fish Completion Script
 	$(INSTALL) -m644 $(FISH_COMP_SRC) $(DESTDIR)$(FISH_COMP_DIR)/
 
+# ===================== Uninstallation ===================
+
+uninstall:
+	$(RM) $(addprefix $(DESTDIR)$(BINDIR)/, $(notdir $(BIN_SCRIPTS) $(MAIN_SCRIPT))) \
+		$(addprefix $(DESTDIR)$(FISH_COMP_DIR)/, $(notdir $(FISH_COMP_SRC)))
+
 # ===================== Clean =====================
 clean:
 	$(RM) $(BUILD_DIR)/save-music
 
 # ===================== Phony Targets =====================
-.PHONY: all check install clean
+.PHONY: all check install uninstall clean
 
