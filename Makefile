@@ -14,7 +14,7 @@ FISH_COMP_SRC := src/share/fish/vendor_completions.d/save-music.fish
 MAIN_SCRIPT := $(BUILD_DIR)/save-music
 
 # ===================== Tools =====================
-ARGBASH := argbash
+ARGBASH := build/argbash/bin/argbash
 INSTALL := install
 MKDIR := mkdir -p
 RM := rm -rf
@@ -24,7 +24,6 @@ all: check $(MAIN_SCRIPT)
 
 # Check Dependencies
 check:
-	@command -v $(ARGBASH) >/dev/null 2>&1 || { echo >&2 "Error：command argbash missing"; exit 1; }
 	@command -v pkg-config >/dev/null 2>&1 || { echo >&2 "Error：command pkg-config mission"; exit 1; }
 
 # Compile Main Script
@@ -48,7 +47,7 @@ install: all
 
 # ===================== Clean =====================
 clean:
-	$(RM) $(BUILD_DIR)
+	$(RM) $(BUILD_DIR)/save-music
 
 # ===================== Phony Targets =====================
 .PHONY: all check install clean
