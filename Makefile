@@ -14,7 +14,7 @@ FISH_COMP_SRC := src/share/fish/vendor_completions.d/save-music.fish
 MAIN_SCRIPT := $(BUILD_DIR)/save-music
 
 # ===================== Tools =====================
-ARGBASH := build/argbash/bin/argbash
+ARGBASH ?= $(shell command -v argbash 2>/dev/null || echo build/argbash/bin/argbash)
 INSTALL := install
 MKDIR := mkdir -p
 RM := rm -rf
